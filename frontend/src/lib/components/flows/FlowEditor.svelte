@@ -17,22 +17,37 @@
 	import TriggerableByAI from '../TriggerableByAI.svelte'
 	const { flowStore } = getContext<FlowEditorContext>('FlowEditorContext')
 
-	export let loading: boolean
-	export let disableStaticInputs = false
-	export let disableTutorials = false
-	export let disableAi = false
-	export let disableSettings = false
-	export let disabledFlowInputs = false
-	export let smallErrorHandler = false
-	export let newFlow: boolean = false
-	export let savedFlow:
-		| (Flow & {
-				draft?: Flow | undefined
-		  })
-		| undefined = undefined
-	export let onDeployTrigger: (trigger: Trigger) => void = () => {}
+	interface Props {
+		loading: boolean
+		disableStaticInputs?: boolean
+		disableTutorials?: boolean
+		disableAi?: boolean
+		disableSettings?: boolean
+		disabledFlowInputs?: boolean
+		smallErrorHandler?: boolean
+		newFlow?: boolean
+		savedFlow?:
+			| (Flow & {
+					draft?: Flow | undefined
+			  })
+			| undefined
+		onDeployTrigger?: (trigger: Trigger) => void
+	}
 
-	let flowModuleSchemaMap: FlowModuleSchemaMap | undefined
+	let {
+		loading,
+		disableStaticInputs = false,
+		disableTutorials = false,
+		disableAi = false,
+		disableSettings = false,
+		disabledFlowInputs = false,
+		smallErrorHandler = false,
+		newFlow = false,
+		savedFlow = undefined,
+		onDeployTrigger = () => {}
+	}: Props = $props()
+
+	let flowModuleSchemaMap: FlowModuleSchemaMap | undefined = $state()
 
 	setContext<PropPickerContext>('PropPickerContext', {
 		flowPropPickerConfig: writable<FlowPropPickerConfig | undefined>(undefined),
@@ -62,7 +77,7 @@
 							<Skeleton layout={[[2], 1.5]} />
 						{/each}
 					</div>
-				{:else if $flowStore.value.modules}
+				{:else if flowStore.val.value.modules}
 					<FlowModuleSchemaMap
 						bind:this={flowModuleSchemaMap}
 						{disableStaticInputs}
@@ -71,7 +86,6 @@
 						{disableSettings}
 						{smallErrorHandler}
 						{newFlow}
-						bind:modules={$flowStore.value.modules}
 						on:reload
 						on:generateStep={({ detail }) => {
 							if (!aiChatManager.open) {
